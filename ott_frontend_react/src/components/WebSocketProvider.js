@@ -23,9 +23,11 @@ export function WebSocketProvider({ children }) {
   const [chatMessages, setChatMessages] = useState([]); // {id, user, text, ts}
   const wsRef = useRef(null);
 
-  // Update this with your actual backend WS endpoint!
-  // Use wss if backend is secure; update origin/port as needed.
-  const WS_URL = process.env.REACT_APP_WS_URL || 'ws://localhost:8765';
+  // PUBLIC_INTERFACE
+  // Backend websocket endpoint for live reactions and chat.
+  // Use REACT_APP_WS_URL from .env or fallback to default (for localhost/dev: ws://localhost:8765)
+  // Should be like ws://<BACKEND_HOST>:<PORT>/ws or wss://...
+  const WS_URL = process.env.REACT_APP_WS_URL || `ws://${window.location.hostname}:8765/ws`;
 
   // -- WebSocket connection management --
   useEffect(() => {
