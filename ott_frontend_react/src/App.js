@@ -1,13 +1,14 @@
 import React, { useState } from "react";
 import "./App.css";
 import { ThemeProvider, useTheme } from "./ThemeContext";
-import { WebSocketProvider } from "./components/WebSocketProvider";
+import { WebSocketProvider, useWebSocket } from "./components/WebSocketProvider";
 import ReactionsPanel from "./components/ReactionsPanel";
 import ChatPanel from "./components/ChatPanel";
 import AISummaries from "./components/AISummaries";
 import StatsCharts from "./components/StatsCharts";
 import Highlights from "./components/Highlights";
 import "./components/WhoVsWhoBar.css";
+import ReactPlayer from "react-player";
 
 /*
   PUBLIC_INTERFACE
@@ -32,18 +33,26 @@ function CoreApp() {
   const isMobile = typeof window !== "undefined" ? window.innerWidth < 700 : false;
 
   // -- Custom video player shell (replace embedded YouTube look) --
+  // PUBLIC_INTERFACE
+  // CustomVideoPlayer embeds YouTube with react-player, and displays emoji reaction count as "2.1k watching"
   function CustomVideoPlayer() {
-    // Track hover state for the video player area
     const [hovered, setHovered] = useState(false);
-
-    // Emoji bar emoji set and desired arrangement per screenshot:
-    // ❤️, 🔥, 😄, 😮, 👏, 😡, 👍 (already provided above in EMOJIS)
-
-    // Import WhoVsWhoBar at the top
-    // import WhoVsWhoBar from "./components/WhoVsWhoBar";
-    // Since we can't dynamically inject import, add it at the top of this file for real usage:
-    // import WhoVsWhoBar from "./components/WhoVsWhoBar";
+    // Require WhoVsWhoBar dynamically (to avoid (potential) cyclic deps)
     const WhoVsWhoBar = require("./components/WhoVsWhoBar").default;
+
+    // Emoji reaction count from websocket store, fallback to mock if needed
+    const ws = useWebSocket();
+    let emojiReactionCount = (ws && ws.reactions && Array.isArray(ws.reactions))
+      ? ws.reactions.length
+      : 2100;
+
+    // Format as "1.5k" etc.
+    function formatWatchers(count) {
+      if (count >= 1e6) return (count / 1e6).toFixed(1).replace(/\.0$/, '') + "M";
+      if (count >= 1e3) return (count / 1e3).toFixed(1).replace(/\.0$/, '') + "k";
+      return count.toString();
+    }
+    const watchersLabel = `${formatWatchers(emojiReactionCount)} watching`;
 
     return (
       <div
@@ -53,29 +62,33 @@ function CoreApp() {
         tabIndex={-1}
         style={{ position: "relative" }}
       >
-        {/* Modern Who vs Who bar above the overlay header */}
+        {/* Who vs Who bar above video */}
         <WhoVsWhoBar
           leftTeam={{ name: "FC Barcelona", abbr: "FCB" }}
           rightTeam={{ name: "Real Madrid", abbr: "RMA" }}
           tournament="UEFA Champions League 2025"
-          matchStatus={{ minute: videoTime > 0
-            ? `${Math.floor(videoTime / 60)}:${(videoTime % 60).toString().padStart(2, "0")}`
-            : "76:42",
-            badge: "LIVE"
+          matchStatus={{
+            minute: videoTime > 0
+              ? `${Math.floor(videoTime / 60)}:${(videoTime % 60).toString().padStart(2, "0")}`
+              : "76:42",
+            badge: "LIVE",
           }}
           score="2 - 1"
         />
-
         <div className="video-card-overlay">
           <div className="top-row">
             <span className="brand-stack">
               <span className="brand-red">Stream</span>
               <span className="brand-white">Sport</span>
-              <span className="live-pill video-live" style={{ marginLeft: 22 }}>LIVE</span>
+              <span className="live-pill video-live" style={{ marginLeft: 22 }}>
+                LIVE
+              </span>
             </span>
             <div className="video-overlay-viewers">
-              <button className="viewer-btn" tabIndex={-1}>
-                <span role="img" aria-label="eye">👁</span> {viewersCount}
+              {/* Emoji count as "watching" replaces any viewers/views */}
+              <button className="viewer-btn" tabIndex={-1} style={{ background: "rgba(60,61,61,0.32)", color: "#ffe" }}>
+                <span role="img" aria-label="reactions" style={{ marginRight: 2 }}>👏</span>
+                {watchersLabel}
               </button>
               <button className="viewer-btn" tabIndex={-1}>
                 <span role="img" aria-label="share">🔗</span>
@@ -84,28 +97,57 @@ function CoreApp() {
           </div>
           <div className="score-row">
             <span className="team-abbr">FCB</span>
-            <span className="main-score">2 <span className="score-sep">-</span> 1</span>
+            <span className="main-score">
+              2 <span className="score-sep">-</span> 1
+            </span>
             <span className="team-abbr">RMA</span>
             <span className="minute-marker-lg">
               {videoTime > 0
                 ? (
                   <span style={{
-                    color: "#ffe141", fontWeight: 900, fontSize: "1.15em", marginLeft: 14
-                  }}>{Math.floor(videoTime / 60)}:{(videoTime % 60).toString().padStart(2, "0")}</span>
+                    color: "#ffe141",
+                    fontWeight: 900,
+                    fontSize: "1.15em",
+                    marginLeft: 14,
+                  }}>
+                    {Math.floor(videoTime / 60)}:{(videoTime % 60).toString().padStart(2, "0")}
+                  </span>
                 )
                 : <span style={{ color: "#ffe141", fontWeight: 900, marginLeft: 14 }}>76:42</span>
               }
             </span>
           </div>
         </div>
-        {/* FAKE video content */}
-        <div className="mock-video-bg">
-          <div className="video-fake-label">[Live Stream Demo]</div>
+        {/* --- EMBEDDED YOUTUBE PLAYER --- */}
+        <div className="react-player-wrapper" style={{ position: 'absolute', left: 0, top: 0, width: '100%', height: '100%', zIndex: 1, display: 'flex', alignItems: 'flex-end', background: 'transparent' }}>
+          <ReactPlayer
+            url="https://www.youtube.com/watch?v=bWiMT8hRRGM"
+            width="100%"
+            height="100%"
+            playing
+            muted={false}
+            controls
+            config={{
+              youtube: {
+                playerVars: { rel: 0, modestbranding: 1, fs: 1 }
+              }
+            }}
+            style={{
+              pointerEvents: 'auto',
+              background: "transparent",
+              borderRadius: 0,
+              boxShadow: 'none'
+            }}
+            onProgress={progress => {
+              // Optionally, update custom seekbar/videoTime here if tightly syncing
+              // setVideoTime(progress.playedSeconds);
+            }}
+          />
         </div>
         {/* Emoji Bar - rendered ONLY when player is hovered */}
-        <ReactionsPanel emojiList={EMOJIS} viewersCount={viewersCount} show={hovered} />
-        {/* Seekbar placeholder */}
-        <div className="seekbar-shell">
+        <ReactionsPanel emojiList={EMOJIS} viewersCount={watchersLabel} show={hovered} />
+        {/* Custom seekbar placeholder (mock modern bar, not functional with react-player for now) */}
+        <div className="seekbar-shell" style={{ position: "relative", zIndex: 3 }}>
           <div className="seekbar-track">
             <div className="seekbar-handle" />
           </div>
