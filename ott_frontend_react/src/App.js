@@ -5,6 +5,7 @@ import ReactionsPanel from './components/ReactionsPanel';
 import ChatPanel from './components/ChatPanel';
 import AISummaries from './components/AISummaries';
 import StatsCharts from './components/StatsCharts';
+import Highlights from './components/Highlights';
 
 /*
   PUBLIC_INTERFACE
@@ -14,6 +15,9 @@ import StatsCharts from './components/StatsCharts';
 function App() {
   const [theme, setTheme] = useState('light');
   const [showChat, setShowChat] = useState(false);
+
+  // Simulated video time state for highlight jumping (if using real player, replace with ref API)
+  const [videoTime, setVideoTime] = useState(0);
 
   const EMOJIS = [
     { char: '❤️', label: 'Heart' },
@@ -64,15 +68,25 @@ function App() {
         <main className="stream-main">
           {/* --- Video Area --- */}
           <div className="video-area">
-            {/* Simulated video for UI layout */}
-            <div className="mock-video-player">
+            {/* Simulated video for UI layout; show highlight time if set */}
+            <div className="mock-video-player" style={{position: "relative"}}>
               <div className="video-overlay-title">
                 <span className="streamsport-logo">StreamSport</span>
                 <span className="live-pill">LIVE</span>
               </div>
               <div className="video-overlay-score">
                 <strong>FCB</strong> <span className="score-main">2 - 1</span> <strong>RMA</strong>
-                <span className="minute-marker">76:42</span>
+                <span className="minute-marker">
+                  {/* Show "jumped" time if highlight jump was clicked */}
+                  {videoTime > 0 ? (
+                    <span style={{
+                      color: "#ffe141", fontWeight: 900, marginRight: 6, fontSize: "1.10em"
+                    }}>
+                      {/* mm:ss */}
+                      {Math.floor(videoTime/60)}:{(videoTime%60).toString().padStart(2,'0')}
+                    </span>
+                  ) : "76:42"}
+                </span>
               </div>
               <div className="video-overlay-viewers">
                 <button className="viewer-btn" tabIndex={-1}><span role="img" aria-label="eye">👁</span> {viewersCount}</button>
@@ -82,6 +96,8 @@ function App() {
             {/* --- Emoji Bar (Sticky/Overlay) --- */}
             <ReactionsPanel emojiList={EMOJIS} viewersCount={viewersCount} />
           </div>
+          {/* --- Highlight Reel Panel --- */}
+          <Highlights onJump={(time) => setVideoTime(time)} />
           {/* --- Live Statistics Charts Panel --- */}
           <StatsCharts pollInterval={60000} />
           {/* --- AI Summaries Panel --- */}
