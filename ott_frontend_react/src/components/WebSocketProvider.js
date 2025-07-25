@@ -21,10 +21,11 @@ export function WebSocketProvider({ children }) {
   const [connected, setConnected] = useState(false);
   const [reactions, setReactions] = useState([]); // {id, emoji, btnIdx, ts}
   const [chatMessages, setChatMessages] = useState([]); // {id, user, text, ts}
+  const [stats, setStats] = useState(null); // live stats (if delivered by ws)
   const wsRef = useRef(null);
 
   // PUBLIC_INTERFACE
-  // Backend websocket endpoint for live reactions and chat.
+  // Backend websocket endpoint for live reactions, chat, and (optionally) stats.
   // Use REACT_APP_WS_URL from .env or fallback to default (for localhost/dev: ws://localhost:8765)
   // Should be like ws://<BACKEND_HOST>:<PORT>/ws or wss://...
   const WS_URL = process.env.REACT_APP_WS_URL || `ws://${window.location.hostname}:8765/ws`;
@@ -53,6 +54,9 @@ export function WebSocketProvider({ children }) {
         setReactions((prev) => [...prev, data.reaction]);
       } else if (data.type === 'chat') {
         setChatMessages((prev) => [...prev, data.message]);
+      } else if (data.type === 'stats') {
+        // If backend emits stats object as {type:'stats', ...payload }
+        setStats(data.stats || data.payload || null);
       }
     };
     wsRef.current = ws;
@@ -109,6 +113,7 @@ export function WebSocketProvider({ children }) {
         connected,
         reactions,
         chatMessages,
+        stats,
         sendReaction,
         sendChat,
       }}

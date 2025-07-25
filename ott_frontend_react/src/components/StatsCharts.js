@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { Bar, Pie, Doughnut } from "react-chartjs-2";
+import React, { useEffect, useState, useCallback } from "react";
+import { Bar, Doughnut } from "react-chartjs-2";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -10,13 +10,15 @@ import {
   Legend,
   ArcElement,
 } from "chart.js";
+import { useWebSocket } from "./WebSocketProvider";
 
 /**
  * PUBLIC_INTERFACE
- * StatsCharts displays various cricket stats as modern, dark, elevated chart cards in a responsive grid
- * with mock data, visually matching the attached chart UI reference.
+ * StatsCharts displays live cricket stats and crowd sentiment in modern, card-based charts.
+ * Fetches data from backend API or over WebSocket, with robust error/loading/empty state handling.
  *
- * Includes: Bar, Doughnut, and Radial/Progress charts using only mock data.
+ * Props:
+ *   - pollInterval: ms to poll for new stats (when WebSocket not providing push events)
  */
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
@@ -32,7 +34,7 @@ const palette = [
   "var(--accent-pink, #f75d84)"
 ];
 
-/* Modern card style based on reference screenshot (use css vars for bg, card, border, radius) */
+/* Modern card style (redesign) */
 const cardStyle = {
   background: "var(--bg-card, #22252a)",
   borderRadius: "var(--border-radius, 20px)",
@@ -49,7 +51,6 @@ const cardStyle = {
   fontFamily: "Helvetica Neue, Arial, sans-serif"
 };
 
-// Responsive and neat grid, more padding and gap
 const gridStyle = {
   display: "grid",
   gap: "24px",
@@ -57,35 +58,121 @@ const gridStyle = {
   alignItems: "stretch"
 };
 
-export default function StatsCharts({ pollInterval = 60000 }) {
-  // Only mock data for this implementation
-  const [stats, setStats] = useState(null);
+// Util: parse backend response to Stats shape, fall back to mock data if needed
+function parseStatsResponse(data) {
+  // expects: {team_runs, wickets, best_players, crowd_sentiment_percent, bowling_completion_percent}
+  // team_runs: [{label, value}], etc.
+  if (!data || typeof data !== "object") return null;
+  // Defensive: only extract what we expect
+  const { team_runs, wickets, best_players, crowd_sentiment_percent, bowling_completion_percent } = data;
+  if (!Array.isArray(team_runs) || !Array.isArray(wickets) || !Array.isArray(best_players)) return null;
+  return {
+    teamRuns: team_runs.map((t, i) => ({ ...t, color: palette[i % palette.length] })),
+    wicketBreakdown: wickets.map((w, i) => ({ ...w, color: palette[(i+2)%palette.length] })),
+    bestPlayers: best_players.map((p, i) => ({ ...p, color: palette[(i)%palette.length] })),
+    crowdSentiment: Number.isFinite(crowd_sentiment_percent) ? crowd_sentiment_percent : null,
+    bowlingCompletion: Number.isFinite(bowling_completion_percent) ? bowling_completion_percent : null
+  };
+}
 
+/**
+ * Fetch stats from backend REST API (replace with real endpoint).
+ * Gracefully handles error/empty state.
+ */
+function fetchStats(setStats, setError, setLoading) {
+  setLoading(true);
+  // Example backend: /api/stats or similar; fallback to mock if fails
+  fetch("/api/stats")
+    .then(resp => {
+      if (!resp.ok) throw new Error(resp.status + "");
+      return resp.json();
+    })
+    .then(data => {
+      const parsed = parseStatsResponse(data);
+      if (parsed) {
+        setStats(parsed);
+        setError(null);
+      } else {
+        setStats(null);
+        setError("Malformed stats data.");
+      }
+    })
+    .catch(err => {
+      setError("Could not load stats: " + (err.message || err));
+      setStats(null);
+    })
+    .finally(() => setLoading(false));
+}
+
+export default function StatsCharts({ pollInterval = 60000 }) {
+  // State: stats, loading, error
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  // Always call hook at top level (fixes react-hooks rules-of-hooks)
+  const ws = useWebSocket();
+
+  // If ws.stats exists and is valid, always show live; otherwise poll REST API
   useEffect(() => {
-    // --- Use static mock data representing a real dashboard for demo ---
-    setStats({
-      teamRuns: [
-        { label: "FCB", value: 242, color: palette[0] },
-        { label: "RMA", value: 230, color: palette[1] }
-      ],
-      wicketBreakdown: [
-        { label: "Bowled", value: 3, color: palette[2] },
-        { label: "Caught", value: 5, color: palette[3] },
-        { label: "LBW", value: 2, color: palette[4] },
-        { label: "Other", value: 1, color: palette[5] }
-      ],
-      bestPlayers: [
-        { label: "Smith", value: 72, color: palette[0] },
-        { label: "Patel", value: 64, color: palette[1] },
-        { label: "Morgan", value: 44, color: palette[2] },
-        { label: "Ali", value: 28, color: palette[3] }
-      ],
-      crowdSentiment: 83, // %
-      bowlingCompletion: 72, // %
-    });
-  }, []);
+    if (ws && ws.stats) {
+      // Allow websocket live stats to take precedence (if structure matches)
+      const parsed = parseStatsResponse(ws.stats);
+      if (parsed) {
+        setStats(parsed);
+        setError(null);
+        setLoading(false);
+      }
+    }
+    // if ws.stats changes, update
+    // eslint-disable-next-line
+  }, [ws && ws.stats]);
+
+  // Initial fetch, and polling unless overridden by WS
+  useEffect(() => {
+    let interval = null;
+    if (!(ws && ws.stats)) {
+      fetchStats(setStats, setError, setLoading);
+      // Poll every pollInterval ms
+      interval = setInterval(() => {
+        fetchStats(setStats, setError, setLoading);
+      }, pollInterval);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+    // eslint-disable-next-line
+  }, [pollInterval, ws && ws.stats]);
+
+  // If neither API nor ws has stats, fallback to static demo data; only after error
+  useEffect(() => {
+    if (!loading && !stats && !ws?.stats && !error) {
+      // Static fallback for demo ONLY; in prod prefer empty/error.
+      setStats({
+        teamRuns: [
+          { label: "FCB", value: 242, color: palette[0] },
+          { label: "RMA", value: 230, color: palette[1] }
+        ],
+        wicketBreakdown: [
+          { label: "Bowled", value: 3, color: palette[2] },
+          { label: "Caught", value: 5, color: palette[3] },
+          { label: "LBW", value: 2, color: palette[4] },
+          { label: "Other", value: 1, color: palette[5] }
+        ],
+        bestPlayers: [
+          { label: "Smith", value: 72, color: palette[0] },
+          { label: "Patel", value: 64, color: palette[1] },
+          { label: "Morgan", value: 44, color: palette[2] },
+          { label: "Ali", value: 28, color: palette[3] }
+        ],
+        crowdSentiment: 83,
+        bowlingCompletion: 72,
+      });
+    }
+  }, [loading, stats, error, ws]);
 
   // -- Chart configurations (styling, legend, data) --
+// ... remainder of file unchanged ...
 
   // Team bar chart -- modern, flat, colored bars, no grid lines, legend top
   function getTeamBarData() {
