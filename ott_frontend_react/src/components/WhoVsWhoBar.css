@@ -1,14 +1,14 @@
 :root {
-  --who-bg: #22252a;           /* Card panel: slightly lighter dark */
-  --who-shadow: 0 4px 24px 0 #0e111733;
-  --who-radius: 29px;
+  --who-bg: var(--bg-card, #22252a);
+  --who-shadow: var(--shadow, 0 4px 24px 0 #0e111733);
+  --who-radius: var(--border-radius, 22px);
   --who-padding: 16px 32px 16px 32px;
-  --who-accent-red: #e54545;
-  --who-accent-gold: #f5cd58;
-  --who-accent-blue: #5da2fa;
-  --who-txt-primary: #fff;
-  --who-txt-secondary: #acb2bb;
-  --who-team-abbr: #fff;
+  --who-accent-red: var(--accent, #e54545);
+  --who-accent-gold: var(--accent-gold, #f5cd58);
+  --who-accent-blue: var(--accent-blue, #5da2fa);
+  --who-txt-primary: var(--text-primary, #fff);
+  --who-txt-secondary: var(--text-secondary, #acb2bb);
+  --who-team-abbr: var(--text-primary, #fff);
   --who-score-font: 'monospace', 'sans-serif';
 }
 .who-vs-who-bar {

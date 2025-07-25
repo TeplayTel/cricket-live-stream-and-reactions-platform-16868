@@ -21,25 +21,24 @@ import {
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
 
-// --- Modern chart color palette (to match reference) ---
+/* --- Modern chart color palette (updated to match new CSS vars/reference) --- */
 const palette = [
-  "#4F96FF", // blue
-  "#F6C958", // yellow
-  "#E87AFA", // purple-pink
-  "#21DCAC", // teal/green
-  "#FF7530", // orange
-  "#7ED957", // green
-  "#ffd500", // gold
-  "#f75d84", // pink
+  "var(--accent-blue, #5da2fa)",
+  "var(--accent-yellow, #f5cd58)",
+  "var(--accent-purple, #e87afa)",
+  "var(--accent-teal, #21dcac)",
+  "var(--accent-orange, #ff7530)",
+  "var(--accent-gold, #f5cd58)",
+  "var(--accent-pink, #f75d84)"
 ];
 
-// Modern card style based on reference screenshot
+/* Modern card style based on reference screenshot (use css vars for bg, card, border, radius) */
 const cardStyle = {
-  background: "#232b36",
-  borderRadius: "20px",
-  boxShadow: "0 4px 24px 0 #0e111766",
+  background: "var(--bg-card, #22252a)",
+  borderRadius: "var(--border-radius, 20px)",
+  boxShadow: "var(--shadow, 0 4px 24px 0 #0e111733)",
   padding: "28px 18px 28px 22px",
-  color: "#fff",
+  color: "var(--text-primary, #fff)",
   minWidth: 240,
   minHeight: 235,
   display: "flex",
@@ -47,7 +46,7 @@ const cardStyle = {
   alignItems: "stretch",
   fontSize: "1.06rem",
   margin: "0",
-  fontFamily: "Helvetica Neue, Arial, sans-serif",
+  fontFamily: "Helvetica Neue, Arial, sans-serif"
 };
 
 // Responsive and neat grid, more padding and gap

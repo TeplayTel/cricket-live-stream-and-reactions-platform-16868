@@ -119,7 +119,7 @@ export default function Highlights({ onJump }) {
             <button
               onClick={() => onJump && onJump(hl.time)}
               style={{
-                color: "var(--stat-gold,#d1b255)",
+                color: "var(--accent-gold,#f5cd58)",
                 background: "none",
                 border: "none",
                 fontWeight: 750,

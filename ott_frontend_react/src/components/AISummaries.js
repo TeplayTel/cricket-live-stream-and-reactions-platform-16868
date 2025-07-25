@@ -69,7 +69,7 @@ export default function AISummaries({ pollInterval = 15000 }) {
         </span>
       </div>
       {error &&
-        <div style={{ color: '#e86c51', margin: '10px 0', fontWeight: 600 }}>
+        <div style={{ color: 'var(--accent,#e54545)', margin: '10px 0', fontWeight: 600 }}>
           Error loading summary: {error}
         </div>
       }
@@ -77,7 +77,7 @@ export default function AISummaries({ pollInterval = 15000 }) {
         <div>
           {summary.match_summary && (
             <div style={{ marginBottom: 16 }}>
-              <div style={{ color: 'var(--stat-gold, #d1b255)', fontWeight: 600, marginBottom: 4 }}>
+              <div style={{ color: 'var(--accent-gold, #f5cd58)', fontWeight: 600, marginBottom: 4 }}>
                 🏏 Match Summary
               </div>
               <div style={{ lineHeight: 1.4 }}>{summary.match_summary}</div>
