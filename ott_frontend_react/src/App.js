@@ -141,21 +141,55 @@ function CoreApp() {
             💬 Chat
           </button>
         </header>
-        {/* --- Modern two-part grid: video area left, charts right --- */}
-        <main className="main-redesign-grid">
-          {/* Left: Video+Highlights */}
-          <div className="mainGrid-left">
-            <section className="videoPlayerArea">
-              <CustomVideoPlayer />
-            </section>
+        {/* --- Modern single-column layout: video player top, all stats/tables below --- */}
+        <main
+          className="main-redesign-grid stacked-below-player"
+          style={{
+            width: "100%",
+            maxWidth: 820,
+            margin: "0 auto",
+            padding: "26px 6vw 20px 6vw",
+            display: "flex",
+            flexDirection: "column",
+            gap: "28px",
+          }}
+        >
+          {/* Video player is always at the top */}
+          <section className="videoPlayerArea" style={{ marginBottom: 0 }}>
+            <CustomVideoPlayer />
+          </section>
+
+          {/* All stats/tables below: stacked */}
+          <section
+            className="below-player-stats"
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: "28px",
+              width: "100%",
+              alignItems: "stretch",
+            }}
+          >
             <Highlights onJump={(time) => setVideoTime(time)} />
-          </div>
-          {/* Right: Chart grid and AI Panel */}
-          <div className="mainGrid-right">
-            <StatsCharts pollInterval={60000} />
-            <AISummaries pollInterval={15000} />
-          </div>
+
+            <div
+              className="stats-charts-and-ai"
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "24px",
+                width: "100%",
+              }}
+            >
+              {/* Modern grid for charts */}
+              <StatsCharts pollInterval={60000} />
+
+              {/* AI summary block, full-width looking card */}
+              <AISummaries pollInterval={15000} />
+            </div>
+          </section>
         </main>
+
         {/* Mobile chat overlay backdrop */}
         {showChat && isMobile && (
           <div
