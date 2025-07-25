@@ -32,9 +32,20 @@ function CoreApp() {
 
   // -- Custom video player shell (replace embedded YouTube look) --
   function CustomVideoPlayer() {
-    // Placeholder: Use actual <video> in production with custom controls.
+    // Track hover state for the video player area
+    const [hovered, setHovered] = useState(false);
+
+    // Emoji bar emoji set and desired arrangement per screenshot:
+    // ❤️, 🔥, 😄, 😮, 👏, 😡, 👍 (already provided above in EMOJIS)
+
     return (
-      <div className="custom-video-player-root">
+      <div
+        className="custom-video-player-root"
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        tabIndex={-1}
+        style={{ position: "relative" }}
+      >
         <div className="video-card-overlay">
           <div className="top-row">
             <span className="brand-stack">
@@ -71,8 +82,8 @@ function CoreApp() {
         <div className="mock-video-bg">
           <div className="video-fake-label">[Live Stream Demo]</div>
         </div>
-        {/* Emoji Bar */}
-        <ReactionsPanel emojiList={EMOJIS} viewersCount={viewersCount} />
+        {/* Emoji Bar - rendered ONLY when player is hovered */}
+        <ReactionsPanel emojiList={EMOJIS} viewersCount={viewersCount} show={hovered} />
         {/* Seekbar placeholder */}
         <div className="seekbar-shell">
           <div className="seekbar-track">

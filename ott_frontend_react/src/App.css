@@ -376,106 +376,126 @@ body {
   }
 }
 
-/* --- MINIMIZED/EXPANDING EMOJI BAR (as per design.md) --- */
-.emoji-bar-minimized {
+/* --- EMOJI BAR (player hover only, reduced size, new style) --- */
+.emoji-bar-hover {
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
   bottom: 56px;
-  background: rgba(23,26,30, 0.88);
-  border-radius: 32px;
-  box-shadow: 0 2px 8px rgba(31,34,38,0.18);
-  padding: 7px 12px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  z-index: 8;
-  transition: box-shadow .18s;
+  z-index: 18;
+  pointer-events: none;
   width: auto;
-  min-width: 98px;
-  pointer-events: auto;
-}
-.emoji-bar-minimized.expanded {
-  box-shadow: 0 8px 32px rgba(31,34,38,0.22);
-}
-.emoji-bar-minimized .emoji-btn {
-  opacity: 1;
-  transition: opacity .16s, box-shadow .19s;
-  border-radius: 50%;
-  margin: 0 2px;
-  box-shadow: none;
-  outline: none;
-  background: transparent;
-}
-.emoji-bar-minimized .emoji-btn:focus {
-  outline: 2.2px solid var(--redesign-yellow, #f5cd58);
-}
-.emoji-bar-minimized .emoji-btn:hover .emoji-icon {
-  filter: drop-shadow(0 2px 18px #ffe6);
-  transform: scale(1.08);
-}
-.emoji-bar-minimized .emoji-btn:active .emoji-icon,
-.emoji-bar-minimized .emoji-btn.animating .emoji-icon {
-  transform: scale(1.22);
-  filter: drop-shadow(0 2px 17px #fae671be);
-  transition: transform 0.18s cubic-bezier(.28,1.44,.23,.91);
-}
-.emoji-bar-minimized .emoji-icon {
-  font-size: 2.0rem;
-  transition: transform 0.18s cubic-bezier(.32,1.28,.22,.86), filter 0.12s;
-  user-select: none;
-}
-.emoji-bar-minimized .emoji-viewers {
-  color: #acb2bb;
-  font-size: 1.08rem;
-  font-weight: 500;
-  margin-left: 11px;
-  opacity: 0.82;
-  transition: opacity 0.18s;
 }
 
-.emoji-bar-minimized .emoji-bubbles {
+/* Bar inner card */
+.emoji-bar-hover .emoji-bar-inner {
+  background: rgba(23, 26, 30, 0.95);
+  border-radius: 24px;
+  padding: 6px 23px 6px 17px;
+  box-shadow: 0 2.5px 18px rgba(31,34,38,0.20);
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  min-width: 230px;
+  pointer-events: auto;
+}
+
+/* Button layout (smaller, circular, spacing) */
+.emoji-bar-hover .emoji-btn {
+  background: none;
+  border: none;
+  outline: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 1.5px;
+  font-size: 23px;
+  transition: background 0.12s, box-shadow 0.13s, transform 0.15s;
+  box-shadow: none;
+  opacity: 1;
+}
+.emoji-bar-hover .emoji-btn:hover .emoji-icon {
+  filter: drop-shadow(0 2px 9px #fff7);
+  transform: scale(1.09);
+}
+.emoji-bar-hover .emoji-btn:active .emoji-icon,
+.emoji-bar-hover .emoji-btn.animating .emoji-icon {
+  transform: scale(1.22);
+  filter: drop-shadow(0 2px 11px #fae671ae);
+  transition: transform 0.14s cubic-bezier(.32,1.28,.22,.86);
+}
+
+/* Emoji icon itself (medium) */
+.emoji-bar-hover .emoji-icon {
+  font-size: 22px;
+  user-select: none;
+  pointer-events: none;
+  transition: transform 0.19s cubic-bezier(.41,1.44,.23,.98), filter 0.12s;
+  display: inline-block;
+}
+
+/* Viewers count: to right */
+.emoji-bar-hover .emoji-viewers {
+  margin-left: 22px;
+  color: #acb2bb;
+  font-size: 1.01rem;
+  font-weight: 500;
+  opacity: 0.84;
+  pointer-events: none;
+  transition: opacity 0.17s;
+}
+
+/* Emoji click bubble/floating effect */
+.emoji-bar-hover .emoji-bubbles {
   position: absolute;
   left: 0; width: 100%;
   bottom: 100%;
   min-height: 0; height: 0;
   pointer-events: none;
-  z-index: 20;
+  z-index: 40;
 }
-.emoji-bar-minimized .emoji-bubble {
+.emoji-bar-hover .emoji-bubble {
   position: absolute;
   bottom: 0px;
   transform: translateX(-50%);
-  font-size: 2.1rem;
-  animation: bubble-float 1s cubic-bezier(.24,1.44,.22,.92) forwards;
+  font-size: 1.5rem;
+  animation: bubble-float-reduced 1s cubic-bezier(.28,1.44,.23,.91) forwards;
   pointer-events: none;
   filter: drop-shadow(0 4px 16px #fff6);
-  opacity: 0.97;
+  opacity: 0.95;
   z-index: 50;
 }
 
-@keyframes bubble-float {
-  0% { opacity: 0.94; transform: translateY(0) scale(1) translateX(-50%);}
-  40% { opacity: 1;   transform: translateY(-24px) scale(1.32) translateX(-50%);}
-  90% { opacity: 0.9; transform: translateY(-76px) scale(1.0) translateX(-50%);}
-  100%{ opacity: 0;   transform: translateY(-130px) scale(0.89) translateX(-50%);}
+@keyframes bubble-float-reduced {
+  0% { opacity: 0.9; transform: translateY(0) scale(1) translateX(-50%);}
+  25% { opacity: 1;   transform: translateY(-13px) scale(1.13) translateX(-50%);}
+  90% { opacity: 0.8; transform: translateY(-75px) scale(0.97) translateX(-50%);}
+  100%{ opacity: 0;   transform: translateY(-98px) scale(0.88) translateX(-50%);}
 }
 
-/* Responsive minimize emoji bar further on mobile */
+/* Hide bar on mobile when not hovered (handled by React logic) */
 @media(max-width:600px) {
-  .emoji-bar-minimized {
-    bottom: 22px;
-    padding: 6px 7px;
-    max-width: 96vw;
-    min-width: 66px;
-    left: 50%;
-    transform: translateX(-50%);
-  }
+  .emoji-bar-hover { bottom: 19px; }
+  .emoji-bar-hover .emoji-bar-inner { min-width: min(98vw, 200px); gap: 6px; padding: 4.5px 7px 4.5px 7px; }
+  .emoji-bar-hover .emoji-btn { width: 27px; height: 27px; font-size: 19px; }
+  .emoji-bar-hover .emoji-icon { font-size: 17px; }
 }
 
-@media(max-width:400px) {
-  .emoji-bar-minimized { max-width: 98vw; padding: 5px 3px;}
-  .emoji-bar-minimized .emoji-icon { font-size: 1.2rem;}
+/* Remove legacy bar (no longer used) */
+.emoji-bar-minimized,
+.emoji-bar,
+.emoji-bar-minimized.expanded,
+.emoji-bar-minimized .emoji-btn,
+.emoji-bar-minimized .emoji-icon,
+.emoji-bar-minimized .emoji-bubbles,
+.emoji-bar-minimized .emoji-bubble,
+.emoji-bar-minimized .emoji-viewers {
+  display: none !important;
+  pointer-events: none !important;
 }
 
 /* --- OTHER: Theme Toggle etc. --- */
