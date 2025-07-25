@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import ReactPlayer from "react-player";
 import "./App.css";
 import { ThemeProvider, useTheme } from "./ThemeContext";
 import { WebSocketProvider } from "./components/WebSocketProvider";
@@ -70,52 +71,66 @@ function CoreApp() {
 
         <main className="stream-main">
           {/* --- Video Area --- */}
-          <div className="video-area">
-            {/* Simulated video for UI layout; show highlight time if set */}
-            <div
-              className="mock-video-player"
-              style={{ position: "relative" }}
-            >
-              <div className="video-overlay-title">
-                <span className="streamsport-logo">StreamSport</span>
-                <span className="live-pill">LIVE</span>
-              </div>
-              <div className="video-overlay-score">
-                <strong>FCB</strong>{" "}
-                <span className="score-main">2 - 1</span> <strong>RMA</strong>
-                <span className="minute-marker">
-                  {/* Show "jumped" time if highlight jump was clicked */}
-                  {videoTime > 0 ? (
-                    <span
-                      style={{
-                        color: "#ffe141",
-                        fontWeight: 900,
-                        marginRight: 6,
-                        fontSize: "1.10em",
-                      }}
-                    >
-                      {/* mm:ss */}
-                      {Math.floor(videoTime / 60)}:
-                      {(videoTime % 60).toString().padStart(2, "0")}
-                    </span>
-                  ) : (
-                    "76:42"
-                  )}
-                </span>
-              </div>
-              <div className="video-overlay-viewers">
-                <button className="viewer-btn" tabIndex={-1}>
-                  <span role="img" aria-label="eye">
-                    👁
-                  </span>{" "}
-                  {viewersCount}
-                </button>
-                <button className="viewer-btn" tabIndex={-1}>
-                  <span role="img" aria-label="share">
-                    🔗
+          <div className="video-area" style={{ position: "relative" }}>
+            {/* Real YouTube video player, overlays above it */}
+            <ReactPlayer
+              url="https://www.youtube.com/watch?v=bWiMT8hRRGM"
+              width="100%"
+              height="100%"
+              playing
+              controls
+              muted={false}
+              style={{
+                borderRadius: "12px",
+                overflow: "hidden",
+                background: "#1a1a1a",
+              }}
+              config={{
+                youtube: {
+                  playerVars: { showinfo: 0, rel: 0 },
+                },
+              }}
+            />
+            {/* --- Video overlays (score, title, etc.) --- */}
+            <div className="video-overlay-title">
+              <span className="streamsport-logo">StreamSport</span>
+              <span className="live-pill">LIVE</span>
+            </div>
+            <div className="video-overlay-score">
+              <strong>FCB</strong>{" "}
+              <span className="score-main">2 - 1</span> <strong>RMA</strong>
+              <span className="minute-marker">
+                {/* Show "jumped" time if highlight jump was clicked */}
+                {videoTime > 0 ? (
+                  <span
+                    style={{
+                      color: "#ffe141",
+                      fontWeight: 900,
+                      marginRight: 6,
+                      fontSize: "1.10em",
+                    }}
+                  >
+                    {/* mm:ss */}
+                    {Math.floor(videoTime / 60)}:
+                    {(videoTime % 60).toString().padStart(2, "0")}
                   </span>
-                </button>
-              </div>
+                ) : (
+                  "76:42"
+                )}
+              </span>
+            </div>
+            <div className="video-overlay-viewers">
+              <button className="viewer-btn" tabIndex={-1}>
+                <span role="img" aria-label="eye">
+                  👁
+                </span>{" "}
+                {viewersCount}
+              </button>
+              <button className="viewer-btn" tabIndex={-1}>
+                <span role="img" aria-label="share">
+                  🔗
+                </span>
+              </button>
             </div>
             {/* --- Emoji Bar (Sticky/Overlay) --- */}
             <ReactionsPanel emojiList={EMOJIS} viewersCount={viewersCount} />
