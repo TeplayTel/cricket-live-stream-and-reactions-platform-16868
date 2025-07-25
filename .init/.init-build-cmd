@@ -1,0 +1,4 @@
+{
+    "command": "npm install && npx tsc --noEmit && npm test -- --ci",
+    "working_directory": "/home/kavia/workspace/code-generation/cricket-live-stream-and-reactions-platform-16868/ott_frontend_react"
+}
