@@ -32,15 +32,8 @@ export default function StatsCharts({ pollInterval = 60000 }) {
     setLoading(true);
     setError(null);
 
-    // Replace this with actual backend fetch.
-    // Use dummy data for now if backend endpoint is not ready.
     try {
-      // const response = await fetch(API_ENDPOINT);
-      // if (!response.ok) throw new Error("Failed to fetch statistics");
-      // const data = await response.json();
-
-      // --- DEMO DATA BEGIN ---
-      // Simulated response:
+      // Demo data for now
       const data = {
         teams: [
           {
@@ -74,8 +67,6 @@ export default function StatsCharts({ pollInterval = 60000 }) {
           { name: "Ali", runs: 29, wickets: 1 },
         ],
       };
-      // --- DEMO DATA END ---
-
       setStats(data);
       setLoading(false);
     } catch (e) {
@@ -84,7 +75,6 @@ export default function StatsCharts({ pollInterval = 60000 }) {
     }
   };
 
-  // Poll the API every pollInterval ms
   useEffect(() => {
     fetchStats();
     const interval = setInterval(fetchStats, pollInterval);
@@ -92,26 +82,23 @@ export default function StatsCharts({ pollInterval = 60000 }) {
     // eslint-disable-next-line
   }, [pollInterval]);
 
-  // Responsive chart card style
+  // -- Card style with larger radius and shadow as per design --
   const cardStyle = {
-    background: "var(--bg-card, #232323)",
-    borderRadius: "12px",
-    boxShadow: "0 2px 8px rgba(0,0,0,0.11)",
-    padding: 24,
-    margin: "18px 0",
-    color: "var(--text-primary, #fff)",
-    width: "100%",
-    maxWidth: 470,
+    background: "#22252A",
+    borderRadius: "22px",
+    boxShadow: "0 4px 24px 0 #0e111733",
+    padding: "20px 22px 28px 22px",
+    color: "#fff",
     minWidth: 240,
     display: "flex",
     flexDirection: "column",
     alignItems: "stretch",
     fontSize: "1.06rem",
+    margin: "0", // margin handled by grid
   };
 
-  // Chart configuration
+  // Chart configuration functions
   function genTeamBarData() {
-    // Show Team Runs, Wickets, Sixes, Fours as grouped bars
     if (!stats?.teams) return {};
     const labels = ["Runs", "Wickets", "Sixes", "Fours"];
     return {
@@ -125,8 +112,8 @@ export default function StatsCharts({ pollInterval = 60000 }) {
           team.stats.sixes,
           team.stats.fours,
         ],
-        borderRadius: 7,
-        maxBarThickness: 44,
+        borderRadius: 8,
+        maxBarThickness: 48,
       })),
     };
   }
@@ -140,11 +127,11 @@ export default function StatsCharts({ pollInterval = 60000 }) {
           label: "Runs",
           data: stats.players.map((p) => p.runs),
           backgroundColor: [
-            "#d1b255",
+            "#5da2fa",
+            "#e175ea",
             "#ff3232",
-            "#26b9f2",
-            "#ffe141",
-            "#97d848",
+            "#f5cd58",
+            "#38e7c5",
           ],
         },
       ],
@@ -153,123 +140,121 @@ export default function StatsCharts({ pollInterval = 60000 }) {
 
   return (
     <section
-      className="stats-charts-panel"
+      className="chart-grid-outer"
       aria-label="Live Team & Player Statistics"
       style={{
-        display: "flex",
-        flexDirection: "row",
-        flexWrap: "wrap",
-        gap: 32,
-        justifyContent: "center",
-        alignItems: "flex-start",
-        margin: "22px 0",
+        width: "100%",
+        margin: "0 0 24px 0",
       }}
     >
-      {/* Chart card: Team Stats */}
-      <div style={cardStyle}>
-        <div style={{ marginBottom: 11 }}>
-          <span
-            style={{
-              background: "var(--stat-gold, #d1b255)",
-              color: "#181818",
-              borderRadius: 8,
-              fontWeight: 700,
-              padding: "2px 11px",
-              fontSize: "1.01rem",
-              marginRight: 9,
-              textTransform: "uppercase",
-              letterSpacing: "0.06em",
-            }}
-          >
-            Team Stats
-          </span>
-          <span style={{ color: "var(--text-secondary,#b0b0b0)", fontSize: "0.97rem" }}>
-            {loading ? "Updating..." : ""}
-          </span>
-        </div>
-        {error && (
-          <div style={{ color: "#ff3232", fontWeight: 600 }}>Error: {error}</div>
-        )}
-        {!error && stats && (
-          <Bar
-            data={genTeamBarData()}
-            height={240}
-            options={{
-              responsive: true,
-              aspectRatio: 1.8,
-              plugins: {
-                legend: {
-                  labels: { color: "var(--text-secondary,#b0b0b0)" },
-                  position: "top"
-                },
-                title: {
-                  display: false,
-                },
-              },
-              scales: {
-                x: {
-                  ticks: { color: "var(--text-secondary,#b0b0b0)" },
-                  grid: { color: "#322" },
-                },
-                y: {
-                  beginAtZero: true,
-                  ticks: { color: "var(--text-secondary,#b0b0b0)", font: { weight: 600 } }
-                },
-              },
-              maintainAspectRatio: false,
-            }}
-          />
-        )}
-        {!error && !stats && !loading && (
-          <div style={{ color: "#d1b255", fontWeight: 600 }}>
-            No stats available.
+      <div
+        className="chart-grid"
+        style={{
+          display: "grid",
+          gap: "22px",
+          gridTemplateColumns: "repeat(auto-fit, minmax(270px, 1fr))",
+          alignItems: "stretch",
+        }}
+      >
+        {/* Chart card: Team Stats */}
+        <div style={cardStyle}>
+          <div style={{ marginBottom: 17 }}>
+            <span
+              style={{
+                background: "#f5cd58",
+                color: "#171a1e",
+                borderRadius: 10,
+                fontWeight: 700,
+                padding: "4px 14px",
+                fontSize: "1.07rem",
+                marginRight: 10,
+                textTransform: "uppercase",
+                letterSpacing: "0.06em",
+              }}
+            >
+              Team Stats
+            </span>
+            <span style={{ color: "#acb2bb", fontSize: "0.97rem", marginLeft: 9 }}>
+              {loading ? "Updating..." : ""}
+            </span>
           </div>
-        )}
-      </div>
-
-      {/* Chart card: Player Pie Chart */}
-      <div style={cardStyle}>
-        <div style={{ marginBottom: 11 }}>
-          <span
-            style={{
-              background: "var(--accent,#ff3232)",
-              color: "#fff",
-              borderRadius: 8,
-              fontWeight: 700,
-              padding: "2px 10px",
-              fontSize: "1.01rem",
-              marginRight: 9,
-              textTransform: "uppercase",
-              letterSpacing: "0.04em",
-            }}
-          >
-            Player Runs
-          </span>
-        </div>
-        {!error && stats && (
-          <Pie
-            data={genPlayerPieData()}
-            height={220}
-            options={{
-              responsive: true,
-              aspectRatio: 1.63,
-              plugins: {
-                legend: {
-                  labels: { color: "var(--text-secondary,#b0b0b0)" },
-                  display: true,
-                  position: "bottom"
+          {error && (
+            <div style={{ color: "#ff3232", fontWeight: 600 }}>Error: {error}</div>
+          )}
+          {!error && stats && (
+            <Bar
+              data={genTeamBarData()}
+              height={255}
+              options={{
+                responsive: true,
+                aspectRatio: 1.7,
+                plugins: {
+                  legend: {
+                    labels: { color: "#acb2bb", font: { size: 13 } },
+                    position: "top",
+                  },
+                  title: { display: false },
                 },
-                title: { display: false },
-              },
-              maintainAspectRatio: false,
-            }}
-          />
-        )}
-        {!error && !stats && !loading && (
-          <div style={{ color: "#d1b255", fontWeight: 600 }}>
-            No stats available.
+                scales: {
+                  x: {
+                    ticks: { color: "#acb2bb" },
+                    grid: { color: "#26262a" },
+                  },
+                  y: {
+                    beginAtZero: true,
+                    ticks: { color: "#acb2bb", font: { weight: 600 } },
+                  },
+                },
+                maintainAspectRatio: false,
+              }}
+            />
+          )}
+          {!error && !stats && !loading && (
+            <div style={{ color: "#f5cd58", fontWeight: 600 }}>No stats available.</div>
+          )}
+        </div>
+        {/* Chart card: Player Runs Pie Chart */}
+        <div style={cardStyle}>
+          <div style={{ marginBottom: 10 }}>
+            <span
+              style={{
+                background: "#5da2fa",
+                color: "#fff",
+                borderRadius: 10,
+                fontWeight: 700,
+                padding: "3px 12px",
+                fontSize: "1.07rem",
+                marginRight: 9,
+                textTransform: "uppercase",
+                letterSpacing: "0.05em",
+              }}
+            >
+              Player Runs
+            </span>
           </div>
-        )}
+          {!error && stats && (
+            <Pie
+              data={genPlayerPieData()}
+              height={223}
+              options={{
+                responsive: true,
+                plugins: {
+                  legend: {
+                    labels: { color: "#acb2bb", font: { size: 13 } },
+                    display: true,
+                    position: "bottom",
+                  },
+                  title: { display: false },
+                },
+                maintainAspectRatio: false,
+              }}
+            />
+          )}
+          {!error && !stats && !loading && (
+            <div style={{ color: "#f5cd58", fontWeight: 600 }}>No stats available.</div>
+          )}
+        </div>
+        {/* Future: insert more chart cards here (for added stats, radial/progress, etc.) */}
       </div>
     </section>
   );

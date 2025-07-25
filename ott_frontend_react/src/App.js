@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import ReactPlayer from "react-player";
 import "./App.css";
 import { ThemeProvider, useTheme } from "./ThemeContext";
 import { WebSocketProvider } from "./components/WebSocketProvider";
@@ -12,13 +11,11 @@ import Highlights from "./components/Highlights";
 /*
   PUBLIC_INTERFACE
   Main App renders the live cricket stream video area,
-  sticky emoji reaction bar, live chat overlay, and animated reactions as per design.
+  chart grid, sleek emoji bar, and custom video player per redesign spec.
 */
 function CoreApp() {
   const { theme, toggleTheme } = useTheme();
   const [showChat, setShowChat] = useState(false);
-
-  // Simulated video time state for highlight jumping (if using real player, replace with ref API)
   const [videoTime, setVideoTime] = useState(0);
 
   const EMOJIS = [
@@ -28,23 +25,69 @@ function CoreApp() {
     { char: "😮", label: "Surprised" },
     { char: "👏", label: "Applause" },
     { char: "😡", label: "Angry" },
-    { char: "👍", label: "Thumbs up" },
+    { char: "👍", label: "Thumbs up" }
   ];
   const viewersCount = "2.1K";
+  const isMobile = typeof window !== "undefined" ? window.innerWidth < 700 : false;
 
-  // Provide overlay tap to close for chat on mobile
-  const isMobile =
-    typeof window !== "undefined"
-      ? window.innerWidth < 700
-      : false;
+  // -- Custom video player shell (replace embedded YouTube look) --
+  function CustomVideoPlayer() {
+    // Placeholder: Use actual <video> in production with custom controls.
+    return (
+      <div className="custom-video-player-root">
+        <div className="video-card-overlay">
+          <div className="top-row">
+            <span className="brand-stack">
+              <span className="brand-red">Stream</span>
+              <span className="brand-white">Sport</span>
+              <span className="live-pill video-live" style={{ marginLeft: 22 }}>LIVE</span>
+            </span>
+            <div className="video-overlay-viewers">
+              <button className="viewer-btn" tabIndex={-1}>
+                <span role="img" aria-label="eye">👁</span> {viewersCount}
+              </button>
+              <button className="viewer-btn" tabIndex={-1}>
+                <span role="img" aria-label="share">🔗</span>
+              </button>
+            </div>
+          </div>
+          <div className="score-row">
+            <span className="team-abbr">FCB</span>
+            <span className="main-score">2 <span className="score-sep">-</span> 1</span>
+            <span className="team-abbr">RMA</span>
+            <span className="minute-marker-lg">
+              {videoTime > 0
+                ? (
+                  <span style={{
+                    color: "#ffe141", fontWeight: 900, fontSize: "1.15em", marginLeft: 14
+                  }}>{Math.floor(videoTime / 60)}:{(videoTime % 60).toString().padStart(2, "0")}</span>
+                )
+                : <span style={{ color: "#ffe141", fontWeight: 900, marginLeft: 14 }}>76:42</span>
+              }
+            </span>
+          </div>
+        </div>
+        {/* FAKE video content */}
+        <div className="mock-video-bg">
+          <div className="video-fake-label">[Live Stream Demo]</div>
+        </div>
+        {/* Emoji Bar */}
+        <ReactionsPanel emojiList={EMOJIS} viewersCount={viewersCount} />
+        {/* Seekbar placeholder */}
+        <div className="seekbar-shell">
+          <div className="seekbar-track">
+            <div className="seekbar-handle" />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <WebSocketProvider>
-      <div className="App stream-bg">
-        <header
-          className="App-header"
-          style={{ background: "none", minHeight: 0, padding: 0 }}
-        >
+      <div className="App stream-bg" style={{ background: "#171a1e" }}>
+        <header className="App-header" style={{ background: "none", minHeight: 0, padding: 0 }}>
+          {/* Theme and chat toggles */}
           <button
             className="theme-toggle"
             onClick={toggleTheme}
@@ -52,7 +95,6 @@ function CoreApp() {
           >
             {theme === "light" ? "🌙 Dark" : "☀️ Light"}
           </button>
-          {/* Chat toggle button */}
           <button
             className="theme-toggle"
             style={{
@@ -68,81 +110,22 @@ function CoreApp() {
             💬 Chat
           </button>
         </header>
-
-        <main className="stream-main">
-          {/* --- Video Area --- */}
-          <div className="video-area" style={{ position: "relative" }}>
-            {/* Real YouTube video player, overlays above it */}
-            <ReactPlayer
-              url="https://www.youtube.com/watch?v=bWiMT8hRRGM"
-              width="100%"
-              height="100%"
-              playing
-              controls
-              muted={false}
-              style={{
-                borderRadius: "12px",
-                overflow: "hidden",
-                background: "#1a1a1a",
-              }}
-              config={{
-                youtube: {
-                  playerVars: { showinfo: 0, rel: 0 },
-                },
-              }}
-            />
-            {/* --- Video overlays (score, title, etc.) --- */}
-            <div className="video-overlay-title">
-              <span className="streamsport-logo">StreamSport</span>
-              <span className="live-pill">LIVE</span>
-            </div>
-            <div className="video-overlay-score">
-              <strong>FCB</strong>{" "}
-              <span className="score-main">2 - 1</span> <strong>RMA</strong>
-              <span className="minute-marker">
-                {/* Show "jumped" time if highlight jump was clicked */}
-                {videoTime > 0 ? (
-                  <span
-                    style={{
-                      color: "#ffe141",
-                      fontWeight: 900,
-                      marginRight: 6,
-                      fontSize: "1.10em",
-                    }}
-                  >
-                    {/* mm:ss */}
-                    {Math.floor(videoTime / 60)}:
-                    {(videoTime % 60).toString().padStart(2, "0")}
-                  </span>
-                ) : (
-                  "76:42"
-                )}
-              </span>
-            </div>
-            <div className="video-overlay-viewers">
-              <button className="viewer-btn" tabIndex={-1}>
-                <span role="img" aria-label="eye">
-                  👁
-                </span>{" "}
-                {viewersCount}
-              </button>
-              <button className="viewer-btn" tabIndex={-1}>
-                <span role="img" aria-label="share">
-                  🔗
-                </span>
-              </button>
-            </div>
-            {/* --- Emoji Bar (Sticky/Overlay) --- */}
-            <ReactionsPanel emojiList={EMOJIS} viewersCount={viewersCount} />
+        {/* --- Modern two-part grid: video area left, charts right --- */}
+        <main className="main-redesign-grid">
+          {/* Left: Video+Highlights */}
+          <div className="mainGrid-left">
+            <section className="videoPlayerArea">
+              <CustomVideoPlayer />
+            </section>
+            <Highlights onJump={(time) => setVideoTime(time)} />
           </div>
-          {/* --- Highlight Reel Panel --- */}
-          <Highlights onJump={(time) => setVideoTime(time)} />
-          {/* --- Live Statistics Charts Panel --- */}
-          <StatsCharts pollInterval={60000} />
-          {/* --- AI Summaries Panel --- */}
-          <AISummaries pollInterval={15000} />
+          {/* Right: Chart grid and AI Panel */}
+          <div className="mainGrid-right">
+            <StatsCharts pollInterval={60000} />
+            <AISummaries pollInterval={15000} />
+          </div>
         </main>
-        {/* Overlay background for mobile when chat is open */}
+        {/* Mobile chat overlay backdrop */}
         {showChat && isMobile && (
           <div
             style={{
