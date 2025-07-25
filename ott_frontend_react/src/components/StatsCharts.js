@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Bar, Pie } from "react-chartjs-2";
+import { Bar, Pie, Doughnut } from "react-chartjs-2";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -13,131 +13,226 @@ import {
 
 /**
  * PUBLIC_INTERFACE
- * StatsCharts displays team and player statistics as responsive charts.
- * Polls backend API every 60s for updated statistics.
- * Props:
- *   - pollInterval: (optional) polling interval in ms (default: 60000)
+ * StatsCharts displays various cricket stats as modern, dark, elevated chart cards in a responsive grid
+ * with mock data, visually matching the attached chart UI reference.
+ *
+ * Includes: Bar, Doughnut, and Radial/Progress charts using only mock data.
  */
+
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
 
-const API_ENDPOINT = "/api/stats"; // Update this if backend API provides a different stats path
+// --- Modern chart color palette (to match reference) ---
+const palette = [
+  "#4F96FF", // blue
+  "#F6C958", // yellow
+  "#E87AFA", // purple-pink
+  "#21DCAC", // teal/green
+  "#FF7530", // orange
+  "#7ED957", // green
+  "#ffd500", // gold
+  "#f75d84", // pink
+];
+
+// Modern card style based on reference screenshot
+const cardStyle = {
+  background: "#232b36",
+  borderRadius: "20px",
+  boxShadow: "0 4px 24px 0 #0e111766",
+  padding: "28px 18px 28px 22px",
+  color: "#fff",
+  minWidth: 240,
+  minHeight: 235,
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "stretch",
+  fontSize: "1.06rem",
+  margin: "0",
+  fontFamily: "Helvetica Neue, Arial, sans-serif",
+};
+
+// Responsive and neat grid, more padding and gap
+const gridStyle = {
+  display: "grid",
+  gap: "24px",
+  gridTemplateColumns: "repeat(auto-fit, minmax(290px, 1fr))",
+  alignItems: "stretch"
+};
 
 export default function StatsCharts({ pollInterval = 60000 }) {
+  // Only mock data for this implementation
   const [stats, setStats] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-
-  // Fetch statistics from backend
-  const fetchStats = async () => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      // Demo data for now
-      const data = {
-        teams: [
-          {
-            name: "FCB",
-            color: "#26b9f2",
-            stats: {
-              runs: 242,
-              wickets: 7,
-              overs: 45,
-              sixes: 14,
-              fours: 18,
-            },
-          },
-          {
-            name: "RMA",
-            color: "#ffe141",
-            stats: {
-              runs: 230,
-              wickets: 10,
-              overs: 50,
-              sixes: 10,
-              fours: 21,
-            },
-          },
-        ],
-        players: [
-          { name: "Smith", runs: 83, wickets: 0 },
-          { name: "Jones", runs: 44, wickets: 1 },
-          { name: "Patel", runs: 73, wickets: 3 },
-          { name: "Morgan", runs: 7, wickets: 0 },
-          { name: "Ali", runs: 29, wickets: 1 },
-        ],
-      };
-      setStats(data);
-      setLoading(false);
-    } catch (e) {
-      setError(e.message);
-      setLoading(false);
-    }
-  };
 
   useEffect(() => {
-    fetchStats();
-    const interval = setInterval(fetchStats, pollInterval);
-    return () => clearInterval(interval);
-    // eslint-disable-next-line
-  }, [pollInterval]);
+    // --- Use static mock data representing a real dashboard for demo ---
+    setStats({
+      teamRuns: [
+        { label: "FCB", value: 242, color: palette[0] },
+        { label: "RMA", value: 230, color: palette[1] }
+      ],
+      wicketBreakdown: [
+        { label: "Bowled", value: 3, color: palette[2] },
+        { label: "Caught", value: 5, color: palette[3] },
+        { label: "LBW", value: 2, color: palette[4] },
+        { label: "Other", value: 1, color: palette[5] }
+      ],
+      bestPlayers: [
+        { label: "Smith", value: 72, color: palette[0] },
+        { label: "Patel", value: 64, color: palette[1] },
+        { label: "Morgan", value: 44, color: palette[2] },
+        { label: "Ali", value: 28, color: palette[3] }
+      ],
+      crowdSentiment: 83, // %
+      bowlingCompletion: 72, // %
+    });
+  }, []);
 
-  // -- Card style with larger radius and shadow as per design --
-  const cardStyle = {
-    background: "#22252A",
-    borderRadius: "22px",
-    boxShadow: "0 4px 24px 0 #0e111733",
-    padding: "20px 22px 28px 22px",
-    color: "#fff",
-    minWidth: 240,
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "stretch",
-    fontSize: "1.06rem",
-    margin: "0", // margin handled by grid
-  };
+  // -- Chart configurations (styling, legend, data) --
 
-  // Chart configuration functions
-  function genTeamBarData() {
-    if (!stats?.teams) return {};
-    const labels = ["Runs", "Wickets", "Sixes", "Fours"];
+  // Team bar chart -- modern, flat, colored bars, no grid lines, legend top
+  function getTeamBarData() {
     return {
-      labels,
-      datasets: stats.teams.map((team) => ({
-        label: team.name,
-        backgroundColor: team.color,
-        data: [
-          team.stats.runs,
-          team.stats.wickets,
-          team.stats.sixes,
-          team.stats.fours,
-        ],
-        borderRadius: 8,
-        maxBarThickness: 48,
-      })),
-    };
-  }
-
-  function genPlayerPieData() {
-    if (!stats?.players) return {};
-    return {
-      labels: stats.players.map((p) => p.name),
+      labels: stats.teamRuns.map((t) => t.label),
       datasets: [
         {
           label: "Runs",
-          data: stats.players.map((p) => p.runs),
-          backgroundColor: [
-            "#5da2fa",
-            "#e175ea",
-            "#ff3232",
-            "#f5cd58",
-            "#38e7c5",
-          ],
+          data: stats.teamRuns.map((t) => t.value),
+          backgroundColor: stats.teamRuns.map((t) => t.color),
+          borderRadius: 11,
+          maxBarThickness: 38,
         },
       ],
     };
   }
 
+  const teamBarOptions = {
+    responsive: true,
+    aspectRatio: 2.2,
+    plugins: {
+      legend: { display: false },
+      title: { display: false },
+      tooltip: { enabled: true }
+    },
+    scales: {
+      x: {
+        grid: { display: false },
+        ticks: { color: "#b5c6db", font: { weight: 500, size: 14 } }
+      },
+      y: {
+        beginAtZero: true,
+        grid: { color: "#293140", borderDash: [5], drawTicks: false },
+        ticks: { color: "#abb2c9", font: { weight: 600, size: 13 } }
+      },
+    },
+    maintainAspectRatio: false,
+  };
+
+  // Pie chart for wicket breakdown
+  function getWicketPieData() {
+    return {
+      labels: stats.wicketBreakdown.map((w) => w.label),
+      datasets: [
+        {
+          data: stats.wicketBreakdown.map((w) => w.value),
+          backgroundColor: stats.wicketBreakdown.map((w) => w.color),
+          borderWidth: 3,
+          borderColor: "#161a21",
+        },
+      ],
+    };
+  }
+
+  const pieOptions = {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: "right",
+        labels: {
+          font: { size: 13, family: "Helvetica Neue, Arial, sans-serif" },
+          color: "#acb2bb",
+          padding: 13,
+        }
+      },
+      title: { display: false },
+      tooltip: { enabled: true }
+    },
+    cutout: "65%", // donut inner radius (large)
+    maintainAspectRatio: false,
+  };
+
+  // Doughnut chart for "Best Players" (simulate central value as in reference)
+  function getBestPlayersDoughnutData() {
+    return {
+      labels: stats.bestPlayers.map((p) => p.label),
+      datasets: [
+        {
+          data: stats.bestPlayers.map((p) => p.value),
+          backgroundColor: stats.bestPlayers.map((p) => p.color),
+          borderWidth: 3,
+          borderColor: "#191e24",
+        }
+      ]
+    };
+  }
+  const playerDoughnutOptions = {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: "right",
+        labels: {
+          font: { size: 13 },
+          color: "#acb2bb",
+          boxWidth: 16,
+          padding: 13,
+        }
+      },
+      title: { display: false },
+      tooltip: { enabled: true },
+    },
+    cutout: "73%",
+    maintainAspectRatio: false,
+  };
+
+  // Simulated radial bar chart: show a doughnut with wide arc, 83%
+  function getRadialBarData(percent, label) {
+    return {
+      labels: [label, ""],
+      datasets: [
+        {
+          data: [percent, 100 - percent],
+          backgroundColor: [palette[2], "#223047"],
+          borderWidth: 5,
+        },
+      ],
+    };
+  }
+  const radialOptions = {
+    responsive: true,
+    plugins: {
+      legend: { display: false },
+      tooltip: { enabled: false },
+    },
+    cutout: "77%",
+    rotation: -90,
+    circumference: 360,
+    maintainAspectRatio: false,
+  };
+
+  // Simulated progress pie
+  function getProgressPieData(percent, label) {
+    return {
+      labels: [label, ""],
+      datasets: [
+        {
+          data: [percent, 100 - percent],
+          backgroundColor: [palette[3], "#273546"],
+          borderWidth: 5,
+        },
+      ],
+    };
+  }
+  const progressPieOptions = radialOptions;
+
+  // -- Render chart cards grid --
   return (
     <section
       className="chart-grid-outer"
@@ -147,114 +242,181 @@ export default function StatsCharts({ pollInterval = 60000 }) {
         margin: "0 0 24px 0",
       }}
     >
-      <div
-        className="chart-grid"
-        style={{
-          display: "grid",
-          gap: "22px",
-          gridTemplateColumns: "repeat(auto-fit, minmax(270px, 1fr))",
-          alignItems: "stretch",
-        }}
-      >
-        {/* Chart card: Team Stats */}
-        <div style={cardStyle}>
-          <div style={{ marginBottom: 17 }}>
-            <span
-              style={{
-                background: "#f5cd58",
-                color: "#171a1e",
-                borderRadius: 10,
-                fontWeight: 700,
-                padding: "4px 14px",
-                fontSize: "1.07rem",
-                marginRight: 10,
-                textTransform: "uppercase",
-                letterSpacing: "0.06em",
-              }}
-            >
-              Team Stats
-            </span>
-            <span style={{ color: "#acb2bb", fontSize: "0.97rem", marginLeft: 9 }}>
-              {loading ? "Updating..." : ""}
-            </span>
+      <div className="chart-grid" style={gridStyle}>
+        {/* 1. Team Runs Bar Chart */}
+        {stats && (
+          <div style={cardStyle}>
+            <div style={{
+              marginBottom: 15,
+              fontSize: "1.01rem",
+              fontWeight: 700,
+              color: palette[0],
+              textTransform: "uppercase"
+            }}>Team Runs</div>
+            <div style={{ minHeight: 172, position: "relative" }}>
+              <Bar
+                data={getTeamBarData()}
+                options={teamBarOptions}
+                height={180}
+              />
+            </div>
+            <div style={{ marginTop: 8, color: "#acb2bb", fontSize: "0.96rem", textAlign: "right" }}>
+              Today
+            </div>
           </div>
-          {error && (
-            <div style={{ color: "#ff3232", fontWeight: 600 }}>Error: {error}</div>
-          )}
-          {!error && stats && (
-            <Bar
-              data={genTeamBarData()}
-              height={255}
-              options={{
-                responsive: true,
-                aspectRatio: 1.7,
-                plugins: {
-                  legend: {
-                    labels: { color: "#acb2bb", font: { size: 13 } },
-                    position: "top",
-                  },
-                  title: { display: false },
-                },
-                scales: {
-                  x: {
-                    ticks: { color: "#acb2bb" },
-                    grid: { color: "#26262a" },
-                  },
-                  y: {
-                    beginAtZero: true,
-                    ticks: { color: "#acb2bb", font: { weight: 600 } },
-                  },
-                },
-                maintainAspectRatio: false,
-              }}
-            />
-          )}
-          {!error && !stats && !loading && (
-            <div style={{ color: "#f5cd58", fontWeight: 600 }}>No stats available.</div>
-          )}
-        </div>
-        {/* Chart card: Player Runs Pie Chart */}
-        <div style={cardStyle}>
-          <div style={{ marginBottom: 10 }}>
-            <span
-              style={{
-                background: "#5da2fa",
+        )}
+        {/* 2. Wicket Type Pie Chart */}
+        {stats && (
+          <div style={cardStyle}>
+            <div style={{
+              marginBottom: 13,
+              fontSize: "1.01rem",
+              fontWeight: 700,
+              color: palette[2],
+              textTransform: "uppercase"
+            }}>Wicket Types</div>
+            <div style={{ position: "relative", minHeight: 145 }}>
+              <Doughnut
+                data={getWicketPieData()}
+                options={pieOptions}
+                height={155}
+              />
+              {/* Central Value */}
+              <span style={{
+                position: "absolute",
+                left: "50%",
+                top: "53%",
+                transform: "translate(-50%,-50%)",
                 color: "#fff",
-                borderRadius: 10,
-                fontWeight: 700,
-                padding: "3px 12px",
-                fontSize: "1.07rem",
-                marginRight: 9,
-                textTransform: "uppercase",
-                letterSpacing: "0.05em",
-              }}
-            >
-              Player Runs
-            </span>
+                fontWeight: 800,
+                fontSize: "1.34rem",
+                letterSpacing: 0.02
+              }}>
+                {stats.wicketBreakdown.reduce((a, b) => a + b.value, 0)}
+              </span>
+            </div>
+            <div style={{ marginTop: 8, color: "#acb2bb", fontSize: "0.93rem", textAlign: "right" }}>
+              All modes
+            </div>
           </div>
-          {!error && stats && (
-            <Pie
-              data={genPlayerPieData()}
-              height={223}
-              options={{
-                responsive: true,
-                plugins: {
-                  legend: {
-                    labels: { color: "#acb2bb", font: { size: 13 } },
-                    display: true,
-                    position: "bottom",
-                  },
-                  title: { display: false },
-                },
-                maintainAspectRatio: false,
-              }}
-            />
-          )}
-          {!error && !stats && !loading && (
-            <div style={{ color: "#f5cd58", fontWeight: 600 }}>No stats available.</div>
-          )}
-        </div>
-        {/* Future: insert more chart cards here (for added stats, radial/progress, etc.) */}
+        )}
+        {/* 3. Best Players Doughnut */}
+        {stats && (
+          <div style={cardStyle}>
+            <div style={{
+              marginBottom: 13,
+              fontSize: "1.01rem",
+              fontWeight: 700,
+              color: palette[1],
+              textTransform: "uppercase"
+            }}>Best Players</div>
+            <div style={{ position: "relative", minHeight: 140 }}>
+              <Doughnut
+                data={getBestPlayersDoughnutData()}
+                options={playerDoughnutOptions}
+                height={143}
+              />
+              {/* Central Value */}
+              <span style={{
+                position: "absolute",
+                left: "50%",
+                top: "54%",
+                transform: "translate(-50%,-50%)",
+                color: "#fff",
+                fontWeight: 900,
+                fontSize: "1.3rem"
+              }}>
+                Top {stats.bestPlayers.length}
+              </span>
+            </div>
+            <div style={{ marginTop: 8, color: "#acb2bb", fontSize: "0.93rem", textAlign: "right" }}>
+              Batting Rankings
+            </div>
+          </div>
+        )}
+
+        {/* 4. Crowd Sentiment Radial Bar */}
+        {stats && (
+          <div style={cardStyle}>
+            <div style={{
+              marginBottom: 13,
+              fontSize: "1.01rem",
+              fontWeight: 700,
+              color: palette[2],
+              textTransform: "uppercase"
+            }}>Crowd Sentiment</div>
+            <div style={{
+              position: "relative",
+              width: "100%",
+              minHeight: 140,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center"
+            }}>
+              <Doughnut
+                data={getRadialBarData(stats.crowdSentiment, "Positive")}
+                options={radialOptions}
+                height={140}
+              />
+              {/* Center value */}
+              <span style={{
+                position: "absolute",
+                left: "50%",
+                top: "54%",
+                transform: "translate(-50%,-50%)",
+                color: palette[2],
+                fontWeight: 900,
+                fontSize: "1.45rem"
+              }}>
+                {stats.crowdSentiment}%
+              </span>
+            </div>
+            <div style={{ marginTop: 8, color: "#acb2bb", fontSize: "0.93rem", textAlign: "right" }}>
+              Positive
+            </div>
+          </div>
+        )}
+
+        {/* 5. Progress Pie (Bowling Completion) */}
+        {stats && (
+          <div style={cardStyle}>
+            <div style={{
+              marginBottom: 13,
+              fontSize: "1.01rem",
+              fontWeight: 700,
+              color: palette[3],
+              textTransform: "uppercase"
+            }}>Overs Completed</div>
+            <div style={{
+              position: "relative",
+              width: "100%",
+              minHeight: 140,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center"
+            }}>
+              <Doughnut
+                data={getProgressPieData(stats.bowlingCompletion, "Completed")}
+                options={progressPieOptions}
+                height={140}
+              />
+              <span style={{
+                position: "absolute",
+                left: "50%",
+                top: "54%",
+                transform: "translate(-50%,-50%)",
+                color: palette[3],
+                fontWeight: 900,
+                fontSize: "1.45rem"
+              }}>
+                {stats.bowlingCompletion}%
+              </span>
+            </div>
+            <div style={{ marginTop: 8, color: "#acb2bb", fontSize: "0.93rem", textAlign: "right" }}>
+              Completed
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );

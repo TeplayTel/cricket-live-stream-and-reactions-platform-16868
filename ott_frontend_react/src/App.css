@@ -360,20 +360,78 @@ body {
 }
 
 /* --- NEW REDESIGN CHART GRID --- */
+/* --- MODERN REDESIGN CHART CARDS & GRID (matches reference image) --- */
 .chart-grid-outer {
   width: 100%;
+  background: none;
+  margin-bottom: 14px;
 }
 .chart-grid {
   display: grid;
-  gap: 20px;
-  grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+  gap: 24px;
+  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
   align-items: stretch;
+  width: 100%;
+}
+.chart-card {
+  background: #232b36;
+  border-radius: 20px;
+  box-shadow: 0 4px 24px #0e111766;
+  padding: 28px 18px 28px 22px;
+  display: flex;
+  flex-direction: column;
+  font-family: "Helvetica Neue", Arial, sans-serif;
+  min-height: 228px;
+  margin: 0;
+}
+.chart-card .card-title {
+  font-size: 1.04rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 13px;
+}
+.chart-card .chart-center-value {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%,-50%);
+  color: #fff;
+  font-family: inherit;
+  font-weight: 800;
+  font-size: 1.33rem;
+  z-index: 2;
+  letter-spacing: 0.02em;
+}
+.chart-card .card-meta {
+  color: #acb2bb;
+  font-size: 0.92rem;
+  text-align: right;
+  margin-top: 9px;
+}
+@media (max-width: 1080px) {
+  .chart-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    padding: 0;
+  }
+  .chart-card {
+    padding: 17px 9px 18px 12px;
+    min-height: 112px;
+  }
 }
 @media (max-width: 800px) {
   .chart-grid {
     grid-template-columns: 1fr;
-    gap: 13px;
+    gap: 12px;
   }
+}
+/* Chart.js legend styling for modern dark card UI */
+.chart-card .legend {
+  font-size: 1.01rem;
+  color: #b3bed4;
+  margin-top: 12px;
+  font-family: inherit;
 }
 
 /* --- EMOJI BAR (player hover only, reduced size, new style) --- */
