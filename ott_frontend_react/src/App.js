@@ -4,6 +4,7 @@ import { WebSocketProvider } from './components/WebSocketProvider';
 import ReactionsPanel from './components/ReactionsPanel';
 import ChatPanel from './components/ChatPanel';
 import AISummaries from './components/AISummaries';
+import StatsCharts from './components/StatsCharts';
 
 /*
   PUBLIC_INTERFACE
@@ -81,6 +82,8 @@ function App() {
             {/* --- Emoji Bar (Sticky/Overlay) --- */}
             <ReactionsPanel emojiList={EMOJIS} viewersCount={viewersCount} />
           </div>
+          {/* --- Live Statistics Charts Panel --- */}
+          <StatsCharts pollInterval={60000} />
           {/* --- AI Summaries Panel --- */}
           <AISummaries pollInterval={15000} />
         </main>
