@@ -476,14 +476,17 @@ body {
   box-shadow: none;
   opacity: 1;
 }
+/* Only visual highlight on hover, but NO scale or "flying" on hover—animation only on .animating/click */
 .emoji-bar-hover .emoji-btn:hover .emoji-icon {
-  filter: drop-shadow(0 2px 9px #fff7);
-  transform: scale(1.09);
+  /* Remove scale and shadow on hover to prevent ANY flying animation on hover */
+  filter: drop-shadow(0 2px 6px #fff9);
+  /* No transform scaling on hover! */
 }
 .emoji-bar-hover .emoji-btn:active .emoji-icon,
 .emoji-bar-hover .emoji-btn.animating .emoji-icon {
+  /* Only on click/click animation: scale and highlight (flying effect) */
   transform: scale(1.22);
-  filter: drop-shadow(0 2px 11px #fae671ae);
+  filter: drop-shadow(0 2px 14px #fae671ae);
   transition: transform 0.14s cubic-bezier(.32,1.28,.22,.86);
 }
 

@@ -3,71 +3,49 @@ import { useWebSocket } from './WebSocketProvider';
 
 /**
  * PUBLIC_INTERFACE
- * Modernized Emoji Reaction Bar, minimized by default, expands on hover,
- * sits above the seekbar—matches the redesigned UX.
+ * Refactored Emoji Reaction Bar—now emoji fly animation ONLY on click, never on hover.
  *
  * Props:
  *  - emojiList: array of { char: string, label: string }
  *  - viewersCount: string|number
- */
-/**
- * PUBLIC_INTERFACE
- * Modernized Emoji Reaction Bar, shown only on player hover, with style and emoji set per latest screenshot.
- * - Props:
- *    - emojiList: array of { char: string, label: string }
- *    - viewersCount: string|number
- *
- * Only renders the emoji bar when 'show' prop is true (controlled by parent/hover state).
- * Uses medium/small emoji size, with all animations retained.
+ *  - show: bool (show bar)
  */
 export default function ReactionsPanel({ emojiList, viewersCount, show }) {
-  const { sendReaction, reactions } = useWebSocket();
+  const { sendReaction } = useWebSocket();
+  // We keep *local* click bubble state, instead of tracking incoming reactions for flying animation
   const [animatingIndex, setAnimatingIndex] = useState(null);
-  const [bubbles, setBubbles] = useState([]);
-  
-  // --- Emoji set and arrangement based on latest screenshot ---
-  // (this is controlled by parent, so emojiList comes from props)
+  const [bubbles, setBubbles] = useState([]); // {id, emoji, btnIdx}
 
-  // Reduced size for emoji button and icon
-  const EMOJI_BTN_SIZE = 32;  // px, medium-small
+  const EMOJI_BTN_SIZE = 32;
   const EMOJI_ICON_SIZE = 22;
 
-  // Animate live bubbles as new reactions come in
-  useEffect(() => {
-    if (reactions.length === 0) return;
-    const last = reactions[reactions.length - 1];
+  // PUBLIC_INTERFACE: On click, animate only the clicked emoji and make its bubble fly
+  function triggerEmoji(emoji, btnIdx) {
+    // Animate the clicked emoji icon and bubble
+    setAnimatingIndex(btnIdx);
     setBubbles((curr) => [
       ...curr,
       {
-        id: last.id || Date.now() + Math.random(),
-        emoji: last.emoji,
-        btnIdx: last.btnIdx,
+        id: Date.now() + Math.random(),
+        emoji,
+        btnIdx,
       },
     ]);
-    setAnimatingIndex(last.btnIdx);
-    const animTimer = setTimeout(() => setAnimatingIndex(null), 330);
-    const removeTimer = setTimeout(() => {
+    // Send the reaction (WebSocket propagation of reaction—it may trigger flying bubbles for other users if necessary)
+    sendReaction({ emoji, btnIdx });
+    setTimeout(() => setAnimatingIndex(null), 340);
+    setTimeout(() => {
       setBubbles((curr) => curr.slice(1));
     }, 1100);
-    return () => {
-      clearTimeout(animTimer);
-      clearTimeout(removeTimer);
-    };
-  }, [reactions.length]);
-
-  // PUBLIC_INTERFACE (unchanged)
-  function triggerEmoji(emoji, btnIdx) {
-    sendReaction({ emoji, btnIdx });
   }
 
-  // For bubble floating, arrange above each btn
+  // Arrange floating emoji bubble above each emoji button (responsive to button index)
   function getButtonOffset(idx) {
     const total = emojiList.length;
-    const base = (100 / (total + 1)) * (idx + 1); // Even left spacing
+    const base = (100 / (total + 1)) * (idx + 1);
     return { left: `${base}%` };
   }
 
-  // Only render if 'show' is true (parent controls hover detection)
   if (!show) return null;
 
   return (
@@ -80,7 +58,7 @@ export default function ReactionsPanel({ emojiList, viewersCount, show }) {
         bottom: "56px",
         zIndex: 18,
         pointerEvents: "none",
-        width: "auto"
+        width: "auto",
       }}
       aria-label="Send a live reaction"
     >
@@ -132,6 +110,7 @@ export default function ReactionsPanel({ emojiList, viewersCount, show }) {
                 fontSize: EMOJI_ICON_SIZE,
                 willChange: "transform",
                 transition: "transform 0.19s cubic-bezier(.41,1.44,.23,.98), filter 0.12s",
+                // ONLY animate scale on click (not hover)
                 transform: animatingIndex === idx ? "scale(1.22)" : "scale(1.0)",
                 filter: animatingIndex === idx
                   ? "drop-shadow(0 2px 13px #ffe8)"
@@ -158,7 +137,7 @@ export default function ReactionsPanel({ emojiList, viewersCount, show }) {
           {viewersCount} watching
         </span>
       </div>
-      {/* Bubbles overlay for animated emoji on click */}
+      {/* Only bubbles triggered by local click fly up */}
       <div className="emoji-bubbles">
         {bubbles.map(bub => (
           <span
