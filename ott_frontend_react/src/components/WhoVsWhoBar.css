@@ -1,0 +1,137 @@
+:root {
+  --who-bg: #22252a;           /* Card panel: slightly lighter dark */
+  --who-shadow: 0 4px 24px 0 #0e111733;
+  --who-radius: 29px;
+  --who-padding: 16px 32px 16px 32px;
+  --who-accent-red: #e54545;
+  --who-accent-gold: #f5cd58;
+  --who-accent-blue: #5da2fa;
+  --who-txt-primary: #fff;
+  --who-txt-secondary: #acb2bb;
+  --who-team-abbr: #fff;
+  --who-score-font: 'monospace', 'sans-serif';
+}
+.who-vs-who-bar {
+  background: var(--who-bg);
+  border-radius: var(--who-radius);
+  box-shadow: var(--who-shadow);
+  padding: var(--who-padding);
+  margin: 0 auto 18px auto;
+  max-width: 665px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  font-family: "Helvetica Neue", Arial, sans-serif;
+}
+.match-meta {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  width: 100%;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  font-size: 1.04rem;
+}
+.match-meta .tournament {
+  color: var(--who-txt-secondary);
+  font-weight: 600;
+  font-size: 1.04rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.match-meta .match-minute {
+  color: var(--who-accent-gold);
+  font-weight: 800;
+  font-size: 1.08rem;
+  margin-left: auto;
+  margin-right: 12px;
+  font-family: var(--who-score-font);
+}
+.match-meta .live-pill {
+  background: var(--who-accent-red);
+  color: var(--who-txt-primary);
+  border-radius: 19px;
+  font-weight: 700;
+  font-size: 1rem;
+  padding: 5px 17px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  box-shadow: 0 2px 12px #e545452d;
+}
+.teams-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  gap: 33px;
+}
+.team {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 85px;
+}
+.team-logo {
+  width: 37px;
+  height: 37px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 3px;
+  box-shadow: 0 2px 12px #0004;
+  background: #191d20;
+}
+.team-abbr {
+  color: var(--who-team-abbr);
+  font-weight: 900;
+  font-size: 1.21rem;
+  letter-spacing: 0.02em;
+}
+.team-name {
+  font-size: 0.97rem;
+  color: var(--who-txt-secondary);
+  font-weight: 500;
+  margin-top: 1px;
+  text-align: center;
+}
+.score-block {
+  background: #1a1d22;
+  border-radius: 12px;
+  padding: 10px 34px;
+  box-shadow: 0 3px 16px #0e11172d;
+  margin: 0 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.score-block .score {
+  color: var(--who-accent-gold);
+  font-family: var(--who-score-font);
+  font-size: 2.16rem;
+  font-weight: 950;
+  letter-spacing: 0.07em;
+  text-shadow: 0 2px 9px #eec35714;
+}
+@media (max-width: 900px) {
+  .who-vs-who-bar {
+    padding: 12px 4vw 14px 4vw;
+    max-width: 99vw;
+  }
+  .score-block {
+    padding: 9px 12vw;
+  }
+}
+@media (max-width: 600px) {
+  .who-vs-who-bar {
+    padding: 8px 2vw 8px 2vw;
+    min-width: 0;
+  }
+  .teams-row {
+    gap: 9vw;
+  }
+  .score-block {
+    padding: 7px 8vw;
+  }
+}
+

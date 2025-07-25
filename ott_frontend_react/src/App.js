@@ -7,6 +7,7 @@ import ChatPanel from "./components/ChatPanel";
 import AISummaries from "./components/AISummaries";
 import StatsCharts from "./components/StatsCharts";
 import Highlights from "./components/Highlights";
+import "./components/WhoVsWhoBar.css";
 
 /*
   PUBLIC_INTERFACE
@@ -38,6 +39,12 @@ function CoreApp() {
     // Emoji bar emoji set and desired arrangement per screenshot:
     // ❤️, 🔥, 😄, 😮, 👏, 😡, 👍 (already provided above in EMOJIS)
 
+    // Import WhoVsWhoBar at the top
+    // import WhoVsWhoBar from "./components/WhoVsWhoBar";
+    // Since we can't dynamically inject import, add it at the top of this file for real usage:
+    // import WhoVsWhoBar from "./components/WhoVsWhoBar";
+    const WhoVsWhoBar = require("./components/WhoVsWhoBar").default;
+
     return (
       <div
         className="custom-video-player-root"
@@ -46,6 +53,19 @@ function CoreApp() {
         tabIndex={-1}
         style={{ position: "relative" }}
       >
+        {/* Modern Who vs Who bar above the overlay header */}
+        <WhoVsWhoBar
+          leftTeam={{ name: "FC Barcelona", abbr: "FCB" }}
+          rightTeam={{ name: "Real Madrid", abbr: "RMA" }}
+          tournament="UEFA Champions League 2025"
+          matchStatus={{ minute: videoTime > 0
+            ? `${Math.floor(videoTime / 60)}:${(videoTime % 60).toString().padStart(2, "0")}`
+            : "76:42",
+            badge: "LIVE"
+          }}
+          score="2 - 1"
+        />
+
         <div className="video-card-overlay">
           <div className="top-row">
             <span className="brand-stack">
